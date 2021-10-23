@@ -22,6 +22,7 @@ function Graph() constructor
 	}
 	#endregion
 	
+	//Node Methods
 	#region Graph.add_node(index);
 	/// @function add_node
 	/// @param index
@@ -31,7 +32,6 @@ function Graph() constructor
 		if (get_node(i) == noone)
 		{
 			var node = new _Node(i);
-			node.graph = self;
 			if (i < array_length(_nodes))
 			{
 				array_resize(_nodes, i - 1);
@@ -49,7 +49,6 @@ function Graph() constructor
 	{
 		var i = array_length(_nodes);
 		var node = new _Node(i);
-		node.graph = self;
 		array_push(_nodes, node);
 		return node;
 	}
@@ -67,7 +66,85 @@ function Graph() constructor
 		return noone;
 	}
 	#endregion
-	//Graph.remove_node MUCH MORE DIFFICULT
+	#region WIP Graph.remove_node(index);
+	/// @function remove_node
+	/// @param index
+	/// @param returns Node
+	static remove_node = function(i)
+	{
+		var node = get_node(i);
+		if (node != noone)
+		{
+			
+		}
+		return noone;
+	}
+	#endregion
+	//TODO: Graph.num_nodes();
+	#region Graph.adjacent(indexA, indexB);
+	/// @function adjacent
+	/// @param indexA
+	/// @param indexB
+	/// @returns Edge
+	static adjacent = function(A, B)
+	{
+		//Get the node we are checking edges.
+		var nodeA = get_node(A);
+		var nodeB = get_node(B);
+		#region Error Checking
+		if (nodeA == noone || nodeB == noone)
+		{
+			var error = "Cannot check for edges between " + string(A) + " and " + string(B) + ".\n";
+			if (nodeA == noone) { error += "Node " + string(A) + " is not defined.\n"; }
+			if (nodeB == noone) { error += "Node " + string(B) + " is not defined.\n"; }
+			show_error(error, false);
+		}
+		#endregion
+		
+		//Check every edge associated with node A.
+		var size = array_length(nodeA._edges);
+		for (var i = 0; i < size; i++)
+		{
+			//Check if that edge is also associated with B.
+			var edge = get_edge(nodeA._edges[i]);
+			if (edge.A == B || edge.B == B)
+			{
+				return edge;
+			}
+		}
+		//Return noone if there is no edge.
+		return noone;
+	}
+	#endregion
+	#region Graph.neighbors(index);
+	/// @function neighbors
+	/// @param index
+	static neighbors = function(i)
+	{
+		var node = get_node(i);
+		#region Error Checking
+		if (node == noone)
+		{
+			var error = "Cannot find neighbors for node " + string(i) + ".\n";
+			error += "Node " + string(i) + " is not defined.\n";
+			show_error(error, false);
+		}
+		#endregion
+		
+		//Check every edge associated with selected node.
+		var arr = array_create(0);
+		var size = array_length(node._edges);
+		for (var e = 0; e < size; e++)
+		{
+			var edge = get_edge(node._edges[e]);
+			if (edge.A == i) { array_push(arr, edge.B); }
+			if (edge.B == i) { array_push(arr, edge.A); }
+		}
+		return arr;
+	}
+	#endregion
+	
+	//Edge Methods
 	#region Graph.add_edge(indexA, indexB);
 	/// @function add_edge
 	/// @param indexA
@@ -87,14 +164,13 @@ function Graph() constructor
 		#region Creating the Edge
 		var i = array_length(_edges);
 		var edge = new _Edge(i);
-		edge.graph = self;
 		array_push(_edges, edge);
 		#endregion
 		#region Defining the Edge
 		edge.A = A;
 		edge.B = B;
-		array_push(nodeA._edges, B);
-		array_push(nodeB._edges, A);
+		array_push(nodeA._edges, i);
+		array_push(nodeB._edges, i);
 		#endregion
 		return edge;
 	}
@@ -112,8 +188,19 @@ function Graph() constructor
 		return noone;
 	}
 	#endregion
-	//Graph.remove_edge PROBABLY DIFFICULT
+	#region WIP Graph.remove_edge(indexA, indexB);
+	/// @function remove_edge
+	/// @param indexA
+	/// @param indexB
+	/// @returns Edge
+	static remove_edge = function(A, B)
+	{
+		
+	}
+	#endregion
+	//TODO: Graph.num_edges();
 	
+	//Graph Properties
 	#region Graph.adj_matrix();
 	/// @function adj_matrix
 	/// @return Array 2D
@@ -135,8 +222,9 @@ function Graph() constructor
 		return matrix;
 	}
 	#endregion
-	///Graph.inc_matrix();
+	//Graph.inc_matrix();
 	
+	//Graph Printing
 	#region Graph.print();
 	/// @function print
 	/// @returns String
@@ -182,7 +270,7 @@ function Graph() constructor
 		return output;
 	}
 	#endregion
-	// Graph.print_inc_matrix
+	//TODO: Graph.print_inc_matrix
 }
 
 //NOTES:
