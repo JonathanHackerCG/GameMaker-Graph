@@ -16,6 +16,10 @@ g.add_edge(3, 2);
 g.add_edge(3, 4);
 g.add_edge(4, 1);
 show_debug_message(g.print());
+
+g.remove_edge(0, 1);
+g.remove_edge(3, 1);
+show_debug_message(g.print());
 show_debug_message(g.print_adj_matrix());
 
 show_debug_message(g.adjacent(0, 1));

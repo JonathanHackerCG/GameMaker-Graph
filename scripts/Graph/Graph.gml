@@ -10,6 +10,12 @@ function Graph() constructor
 	{
 		index = _index;
 		_edges = array_create(0);
+		#region _Node.num_edges();
+		static num_edges = function()
+		{
+			return array_length(_edges);
+		}
+		#endregion
 	}
 	#endregion
 	#region Graph._Edge(index) constructor
@@ -117,7 +123,7 @@ function Graph() constructor
 				return edge;
 			}
 		}
-		//Return noone if there is no edge.
+		//Return noone if there is no edge between those nodes.
 		return noone;
 	}
 	#endregion
@@ -193,14 +199,72 @@ function Graph() constructor
 		return noone;
 	}
 	#endregion
-	#region WIP Graph.remove_edge(indexA, indexB);
+	#region Graph.remove_edge(indexA, indexB);
 	/// @function remove_edge
 	/// @param indexA
 	/// @param indexB
 	/// @returns Edge
 	static remove_edge = function(A, B)
 	{
+		//Get the node we are checking edges.
+		var nodeA = get_node(A);
+		var nodeB = get_node(B);
+		#region Error Checking
+		if (nodeA == noone || nodeB == noone)
+		{
+			var error = "Cannot removed edges between " + string(A) + " and " + string(B) + ".\n";
+			if (nodeA == noone) { error += "Node " + string(A) + " is not defined.\n"; }
+			if (nodeB == noone) { error += "Node " + string(B) + " is not defined.\n"; }
+			show_error(error, false);
+		}
+		#endregion
 		
+		//Check every edge associated with node A.
+		var sizeA = nodeA.num_edges();
+		var sizeB = nodeB.num_edges();
+		for (var i = 0; i < sizeA; i++)
+		{
+			//Check if that edge is also associated with B.
+			var edge_index = nodeA._edges[i];
+			var edge = get_edge(edge_index);
+			if (edge.A == B || edge.B == B)
+			{
+				//Remove the edge.
+				array_delete(_edges, edge_index, 1);	//Remove the edge from the graph.
+				array_delete(nodeA._edges, i, 1);			//Remove the edge from nodeA.
+				for (var j = 0; j < sizeB; j++)				//Remove the edge from nodeB.
+				{
+					if (nodeB._edges[j] == edge_index)
+					{
+						array_delete(nodeB._edges, j, 1);
+						break;
+					}
+				}
+				
+				//Update all nodes to account for the removed edge.
+				if (edge_index != num_edges() - 1) //Skip if it was the final edge.
+				{
+					var sizeN = num_nodes();
+					for (var j = 0; j < sizeN; j++)
+					{
+						var node = get_node(j);
+						var sizeE = node.num_edges();
+						for (var k = 0; k < sizeE; k++)
+						{
+							if (node._edges[k] >= edge_index)
+							{
+								node._edges[k] --;
+							}
+						}
+					}
+				}
+				
+				//Return the edge that was deleted.
+				return edge;
+			}
+		}
+		//Return noone if there is no edge between those nodes.
+		return noone;
 	}
 	#endregion
 	#region Graph.num_edges();
