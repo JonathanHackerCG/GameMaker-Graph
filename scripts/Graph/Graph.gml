@@ -80,7 +80,12 @@ function Graph() constructor
 		return noone;
 	}
 	#endregion
-	//TODO: Graph.num_nodes();
+	#region Graph.num_nodes();
+	static num_nodes = function()
+	{
+		return array_length(_nodes);
+	}
+	#endregion
 	#region Graph.adjacent(indexA, indexB);
 	/// @function adjacent
 	/// @param indexA
@@ -198,7 +203,12 @@ function Graph() constructor
 		
 	}
 	#endregion
-	//TODO: Graph.num_edges();
+	#region Graph.num_edges();
+	static num_edges = function()
+	{
+		return array_length(_edges);
+	}
+	#endregion
 	
 	//Graph Properties
 	#region Graph.adj_matrix();
