@@ -2,13 +2,11 @@ function Graph() constructor
 {
 	_nodes = array_create(0);
 	_edges = array_create(0);
-	#region Graph._Node(index) constructor
+	#region Graph._Node() constructor
 	/// @function _Node
-	/// @param index
 	/// @returns Node
 	static _Node = function(_index) constructor
 	{
-		index = _index;
 		_edges = array_create(0);
 		#region _Node.num_edges();
 		static num_edges = function()
@@ -18,43 +16,22 @@ function Graph() constructor
 		#endregion
 	}
 	#endregion
-	#region Graph._Edge(index) constructor
+	#region Graph._Edge() constructor
 	/// @function _Edge
-	/// @param index
 	/// @returns Edge
-	static _Edge = function(_index) constructor
+	static _Edge = function() constructor
 	{
-		index = _index;
+		
 	}
 	#endregion
 	
 	//Node Methods
-	#region Graph.add_node(index);
+	#region Graph.add_node();
 	/// @function add_node
-	/// @param index
 	/// @returns Node
-	static add_node = function(i)
+	static add_node = function()
 	{
-		if (get_node(i) == noone)
-		{
-			var node = new _Node(i);
-			if (i < array_length(_nodes))
-			{
-				array_resize(_nodes, i - 1);
-			}
-			_nodes[i] = node;
-			return node;
-		}
-		return noone;
-	}
-	#endregion
-	#region Graph.push_node();
-	/// @function push_node
-	/// @returns Node
-	static push_node = function()
-	{
-		var i = array_length(_nodes);
-		var node = new _Node(i);
+		var node = new _Node();
 		array_push(_nodes, node);
 		return node;
 	}
@@ -65,25 +42,88 @@ function Graph() constructor
 	/// @returns Node
 	static get_node = function(i)
 	{
-		if (i >= 0 && i < array_length(_nodes))
+		if (i >= 0 && i < num_nodes())
 		{
 			return _nodes[i];
 		}
 		return noone;
 	}
 	#endregion
-	#region WIP Graph.remove_node(index);
+	#region Graph.remove_node(index);
 	/// @function remove_node
 	/// @param index
-	/// @param returns Node
-	static remove_node = function(i)
+	/// @returns Node
+	static remove_node = function(index)
 	{
-		var node = get_node(i);
-		if (node != noone)
+		var nodeA = get_node(index);
+		#region Error Checking
+		if (nodeA == noone)
 		{
-			
+			var error = "Cannot remove node " + string(index) + ". This node is not defined.";
+			show_error(error, false);
 		}
-		return noone;
+		#endregion
+		
+		//Update all edges to account for the removed node.
+		var size = num_edges();
+		for (var i = 0; i < size; i++)
+		{
+			var edge = get_edge(i);
+			if (edge.A == index || edge.B == index)
+			{
+				array_delete(_edges, i, 1);	//Remove the edge from the graph.
+				
+				//Get the other node connected to node A.
+				if (edge.A != index) { var nodeB = get_node(edge.A); }
+				if (edge.B != index) { var nodeB = get_node(edge.B); }
+				
+				//Remove the edge from node B.
+				var sizeB = nodeB.num_edges();
+				for (var j = 0; j < sizeB; j++)
+				{
+					if (nodeB._edges[j] == i)
+					{
+						array_delete(nodeB._edges, j, 1);
+						break;
+					}
+				}
+				
+				//Decrement i to account for removed edge.
+				i --; size --;
+			}
+			
+			//Reduce the edge index to account for the removed node.
+			if (edge.A > index) { edge.A --; }
+			if (edge.B > index) { edge.B --; }
+		}
+		
+		//Remove the node from the graph.
+		array_delete(_nodes, index, 1);
+		
+		//Update edge references to account for removed edges.
+		var size = num_nodes();
+		var num_removed = nodeA.num_edges();
+		for (var i = 0; i < size; i++)
+		{
+			var node = get_node(i);
+			var sizeE = node.num_edges();
+			var temp = array_create(0);
+			array_copy(temp, 0, node._edges, 0, node.num_edges());
+			
+			for (var j = 0; j < sizeE; j++)
+			{
+				//Compare every edge of every node to the removed edges.
+				for (var k = 0; k < num_removed; k++)
+				{
+					if (temp[j] > nodeA._edges[k])
+					{
+						node._edges[j] --;
+					}
+				}
+			}
+		}
+		
+		return nodeA;
 	}
 	#endregion
 	#region Graph.num_nodes();
@@ -113,10 +153,10 @@ function Graph() constructor
 		#endregion
 		
 		//Check every edge associated with node A.
-		var size = array_length(nodeA._edges);
+		var size = nodeA.num_edges();
 		for (var i = 0; i < size; i++)
 		{
-			//Check if that edge is also associated with B.
+			//Check if that edge is also associated with node B.
 			var edge = get_edge(nodeA._edges[i]);
 			if (edge.A == B || edge.B == B)
 			{
@@ -130,26 +170,26 @@ function Graph() constructor
 	#region Graph.neighbors(index);
 	/// @function neighbors
 	/// @param index
-	static neighbors = function(i)
+	static neighbors = function(index)
 	{
-		var node = get_node(i);
+		var node = get_node(index);
 		#region Error Checking
 		if (node == noone)
 		{
-			var error = "Cannot find neighbors for node " + string(i) + ".\n";
-			error += "Node " + string(i) + " is not defined.\n";
+			var error = "Cannot find neighbors for node " + string(index) + ".\n";
+			error += "Node " + string(index) + " is not defined.\n";
 			show_error(error, false);
 		}
 		#endregion
 		
 		//Check every edge associated with selected node.
 		var arr = array_create(0);
-		var size = array_length(node._edges);
-		for (var e = 0; e < size; e++)
+		var size = node.num_edges();
+		for (var i = 0; i < size; i++)
 		{
-			var edge = get_edge(node._edges[e]);
-			if (edge.A == i) { array_push(arr, edge.B); }
-			if (edge.B == i) { array_push(arr, edge.A); }
+			var edge = get_edge(node._edges[i]);
+			if (edge.A == index) { array_push(arr, edge.B); }
+			if (edge.B == index) { array_push(arr, edge.A); }
 		}
 		return arr;
 	}
@@ -173,8 +213,8 @@ function Graph() constructor
 		}
 		#endregion
 		#region Creating the Edge
-		var i = array_length(_edges);
-		var edge = new _Edge(i);
+		var i = num_edges();
+		var edge = new _Edge();
 		array_push(_edges, edge);
 		#endregion
 		#region Defining the Edge
@@ -212,7 +252,7 @@ function Graph() constructor
 		#region Error Checking
 		if (nodeA == noone || nodeB == noone)
 		{
-			var error = "Cannot removed edges between " + string(A) + " and " + string(B) + ".\n";
+			var error = "Cannot remove edges between " + string(A) + " and " + string(B) + ".\n";
 			if (nodeA == noone) { error += "Node " + string(A) + " is not defined.\n"; }
 			if (nodeB == noone) { error += "Node " + string(B) + " is not defined.\n"; }
 			show_error(error, false);

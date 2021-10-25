@@ -4,8 +4,7 @@ event_inherited();
 g = new Graph();
 
 //Populate 5 nodes.
-repeat(5) { g.push_node(); }
-show_debug_message(g.print());
+repeat(5) { g.add_node(); }
 
 //Add edges between nodes.
 g.add_edge(0, 1);
@@ -17,13 +16,17 @@ g.add_edge(3, 4);
 g.add_edge(4, 1);
 show_debug_message(g.print());
 
-g.remove_edge(0, 1);
-g.remove_edge(3, 1);
+g.remove_node(0);
 show_debug_message(g.print());
-show_debug_message(g.print_adj_matrix());
 
-show_debug_message(g.adjacent(0, 1));
-show_debug_message(g.adjacent(0, 4));
+g.remove_node(1);
+show_debug_message(g.print());
 
-show_debug_message(g.neighbors(0));
-show_debug_message(g.neighbors(3));
+g.remove_node(0);
+show_debug_message(g.print());
+
+g.remove_node(0);
+show_debug_message(g.print());
+
+g.remove_node(0);
+show_debug_message(g.print());
